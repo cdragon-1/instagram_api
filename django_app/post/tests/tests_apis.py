@@ -1,3 +1,5 @@
+
+import os
 import random
 
 from django.contrib.auth import get_user_model
@@ -8,28 +10,12 @@ from rest_framework import status
 from rest_framework.test import APILiveServerTestCase
 
 from post.models import Post
+from utils.testcase import APITestCaseAuthMixin
 
 User = get_user_model()
 
 
-class PostTest(APILiveServerTestCase):
-    test_username = 'test_username'
-    test_password = 'test_password'
-
-    def create_user(self):
-        user = User.objects.create_user(
-            username=self.test_username,
-            password=self.test_password,
-        )
-        return user
-
-    def create_user_and_login(self):
-        self.create_user()
-        self.client.login(
-            username = self.test_username,
-            password = self.test_password,
-        )
-
+class PostTest(APITestCaseAuthMixin, APILiveServerTestCase):
     def create_post(self, num=1):
         """
         :param num: 생성할 Post수
@@ -64,6 +50,7 @@ class PostTest(APILiveServerTestCase):
         response = self.create_post()
         # response의 status_code가 201(Created)이어야 함
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        # response의 key값 검사
         self.assertIn('author', response.data)
         self.assertIn('created_date', response.data)
 
@@ -80,12 +67,21 @@ class PostTest(APILiveServerTestCase):
         self.assertEqual(Post.objects.exists(), False)
 
     def test_post_list(self):
+        # Post생성 위해 유저 생성 후 로그인
+        self.create_user_and_login(self.client)
+
+        # 생성할 Post개수 지정
         num = random.randrange(1, 50)
-        self.create_user_and_login()
+
+        # num만큼 Post생성
         self.create_post(num)
         url = reverse('api:post-list')
         response = self.client.get(url)
+
+        # status_code확인
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # num만큼 생성되었는지 확인
         self.assertEqual(len(response.data), num)
 
     def test_post_update_partial(self):
@@ -99,3 +95,43 @@ class PostTest(APILiveServerTestCase):
 
     def test_post_destroy(self):
         pass
+
+
+class PostPhotoTest(APITestCaseAuthMixin, APILiveServerTestCase):
+    def test_photo_add_to_post(self):
+        # 유저 생성 및 로그인
+        user = self.create_user_and_login(self.client)
+
+        # 해당 유저로 Post생성
+        url = reverse('api:post-list')
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Post.objects.count(), 1)
+        post = Post.objects.first()
+        self.assertEqual(post.author, user)
+
+        # 생성한 Post에 PostPhoto를 추가
+        url = reverse('api:photo-create')
+
+        # test_images.jpg파일을 이용해서 생성
+        file_path = os.path.join(os.path.dirname(__file__), 'test_image.jpg')
+        with open(file_path, 'rb') as fp:
+            data = {
+                'post': post.id,
+                'photo': fp
+            }
+            response = self.client.post(url, data)
+        # status_code확인
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        #key확인
+        self.assertIn('post', response.data)
+        self.assertIn('photo', response.data)
+        #value 확인
+        self.assertEqual(post.pk, response.data['post'])
+
+    def test_cannot_photo_add_to_post_not_authenticated(self):
+        pass
+
+    def test_cannot_photo_add_to_post_user_is_not_author(self):
+        pass
+
