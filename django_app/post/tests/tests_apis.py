@@ -54,6 +54,11 @@ class PostTest(APITestCaseAuthMixin, APILiveServerTestCase):
         self.assertIn('author', response.data)
         self.assertIn('created_date', response.data)
 
+        # response의 author값 검사
+        response_author = response.date['author']
+        self.assertIn('pk', response_author)
+        self.assertIn('username', response_author)
+
         # 생성 후 Post인스턴스가 총 1개여야 함
         self.assertEqual(Post.objects.count(), 1)
         # 생성된 Post인스턴스의 author pk(id)가 테스트시 생성한 User의 pk(id)와 같아야 함
@@ -83,6 +88,13 @@ class PostTest(APITestCaseAuthMixin, APILiveServerTestCase):
 
         # num만큼 생성되었는지 확인
         self.assertEqual(len(response.data), num)
+
+        # 생성된 response 의 author필드가 pk가 아닌 dict 형태로 전달되는지 확인
+        for item in response.data:
+            self.assertIn('author', item)
+            item_author = item['author']
+            self.assertIn('pk', item_author)
+            self.assertIn('username', item_author)
 
     def test_post_update_partial(self):
         pass
