@@ -150,18 +150,24 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 
-STATIC_URL = '/static/'
-MEDIA_URL = '/media/'
 
 # Django가 개발모드에서 정적파일을 검색할 경로 목록
+
 STATIC_DIR = os.path.join(BASE_DIR, 'static')
+BOWER_DIR = os.path.join(ROOT_DIR, 'bower_components')
 STATIC_ROOT = os.path.join(BASE_DIR, 'static_root')
 STATICFILES_DIRS = [
     STATIC_DIR,
+    BOWER_DIR,
 ]
+STATIC_URL = '/static/'
+MEDIA_URL = '/media/'
+
 
 # RESTFRAMEWORK
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 5
+    'PAGE_SIZE': 50
 }
+
+LOGIN_URL = '/admin/'
