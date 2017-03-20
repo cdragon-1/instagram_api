@@ -17,4 +17,3 @@ class PostPhotoCreate(generics.CreateAPIView):
 class PostPhotoDestroy(generics.DestroyAPIView):
     queryset = PostPhoto.objects.all()
     serializer_class = PostPhotoSerializer
-

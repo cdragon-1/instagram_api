@@ -1,4 +1,5 @@
 """instagram URL Configuration
+
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/1.10/topics/http/urls/
 Examples:
@@ -15,14 +16,15 @@ Including another URLconf
 from django.conf.urls import url, include
 from django.contrib import admin
 
-
+# HttpRequest / HttpResponse를 위한 urls
 from post.urls import views as post_urls
+
+# API (JsonResponse)를 위한 urls
 from post.urls import apis as post_apis_urls
 
 api_urlpatterns = [
     url(r'^post/', include(post_apis_urls)),
 ]
-
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),

@@ -1,4 +1,3 @@
-
 import os
 import random
 
@@ -54,22 +53,20 @@ class PostTest(APITestCaseAuthMixin, APILiveServerTestCase):
         # response의 key값 검사
         self.assertIn('author', response.data)
         self.assertIn('created_date', response.data)
+        self.assertIn('postphoto_set', response.data)
 
         # response의 author값 검사
-        response_author = response.date['author']
+        response_author = response.data['author']
         self.assertIn('pk', response_author)
         self.assertIn('username', response_author)
 
-        # self.assertIn('postphoto_set', response_data)
-        # response의 postphoto set값 검사
+        # response의 postphoto_set값 검사
         response_postphoto_set = response.data['postphoto_set']
         self.assertIsInstance(response_postphoto_set, list)
         for postphoto_object in response_postphoto_set:
             self.assertIn('pk', postphoto_object)
             self.assertIn('photo', postphoto_object)
             self.assertIn('created_date', postphoto_object)
-
-        # response의 postphoto_set
 
         # 생성 후 Post인스턴스가 총 1개여야 함
         self.assertEqual(Post.objects.count(), 1)
@@ -101,12 +98,20 @@ class PostTest(APITestCaseAuthMixin, APILiveServerTestCase):
         # num만큼 생성되었는지 확인
         self.assertEqual(len(response.data), num)
 
-        # 생성된 response 의 author필드가 pk가 아닌 dict 형태로 전달되는지 확인
+        # 생성된 response의 author필드가 pk가 아닌 dict형태로 전달되는지 확인
         for item in response.data:
             self.assertIn('author', item)
             item_author = item['author']
             self.assertIn('pk', item_author)
             self.assertIn('username', item_author)
+
+            # response의 postphoto_set값 검사
+            item_postphoto_set = item['postphoto_set']
+            self.assertIsInstance(item_postphoto_set, list)
+            for postphoto_object in item_postphoto_set:
+                self.assertIn( 'pk', postphoto_object)
+                self.assertIn('photo', postphoto_object)
+                self.assertIn('created_date', postphoto_object)
 
     def test_post_update_partial(self):
         pass
@@ -145,12 +150,15 @@ class PostPhotoTest(APITestCaseAuthMixin, APILiveServerTestCase):
                 'photo': fp
             }
             response = self.client.post(url, data)
+
         # status_code확인
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        #key확인
+
+        # key 확인
         self.assertIn('post', response.data)
         self.assertIn('photo', response.data)
-        #value 확인
+
+        # value확인
         self.assertEqual(post.pk, response.data['post'])
 
     def test_cannot_photo_add_to_post_not_authenticated(self):
@@ -158,4 +166,3 @@ class PostPhotoTest(APITestCaseAuthMixin, APILiveServerTestCase):
 
     def test_cannot_photo_add_to_post_user_is_not_author(self):
         pass
-
