@@ -1,3 +1,12 @@
+from django.test import LiveServerTestCase
 from django.test import TestCase
 
-# Create your tests here.
+
+
+class RelationTest(LiveServerTestCase):
+    @staticmethod
+    pass
+
+
+
+

@@ -50,6 +50,7 @@ class PostTest(APITestCaseAuthMixin, APILiveServerTestCase):
         response = self.create_post()
         # response의 status_code가 201(Created)이어야 함
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
         # response의 key값 검사
         self.assertIn('author', response.data)
         self.assertIn('created_date', response.data)
@@ -58,6 +59,17 @@ class PostTest(APITestCaseAuthMixin, APILiveServerTestCase):
         response_author = response.date['author']
         self.assertIn('pk', response_author)
         self.assertIn('username', response_author)
+
+        # self.assertIn('postphoto_set', response_data)
+        # response의 postphoto set값 검사
+        response_postphoto_set = response.data['postphoto_set']
+        self.assertIsInstance(response_postphoto_set, list)
+        for postphoto_object in response_postphoto_set:
+            self.assertIn('pk', postphoto_object)
+            self.assertIn('photo', postphoto_object)
+            self.assertIn('created_date', postphoto_object)
+
+        # response의 postphoto_set
 
         # 생성 후 Post인스턴스가 총 1개여야 함
         self.assertEqual(Post.objects.count(), 1)
