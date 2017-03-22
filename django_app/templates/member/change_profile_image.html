@@ -1,10 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Image-Profile</title>
-</head>
-<body>
+{% extends 'common/base.html' %}
 
-</body>
-</html>
+{% block content %}
+	<div class="change-profile-image-container">
+		<form action="" method="POST" enctype="multipart/form-data">{% csrf_token %}
+			{{ form }}
+			<button type="submit" class="btn">Submit</button>
+		</form>
+	</div>
+{% endblock %}
